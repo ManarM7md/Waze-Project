@@ -80,7 +80,7 @@ def make_predictions(df):
 
     # Filling NaN values
     for col in ['activity_ratio', 'avg_distance_per_drive', 'engagement_ratio', 'avg_navigations_fav']:
-        X_test[col].fillna(X_test[col].median(), inplace=True)
+        X_test[col] = X_test[col].fillna(X_test[col].median())
 
     # Mapping engagement and day levels to numerical values
     X_test['engagement_level'] = X_test['engagement_level'].map({'Low Engagement': 0, 'High Engagement': 1})
