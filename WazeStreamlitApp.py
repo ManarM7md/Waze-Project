@@ -32,7 +32,7 @@ def load_pickle_from_url(url):
 
 # Load the scaler and model using the custom function
 scaler = load_pickle_from_url('https://github.com/ManarM7md/Waze-Project/raw/main/scaler.pkl')
-selector = load_pickle_from_url('https://github.com/ManarM7md/Waze-Project/raw/main/SelectFromModel.pkl')
+selector = load_pickle_from_url('https://github.com/ManarM7md/Waze-Project/raw/main/lasso_model_and_selector.pkl')
 logistic_regression_model = load_pickle_from_url('https://github.com/ManarM7md/Waze-Project/raw/main/logistic_regression_model.pkl')
 
 def segment_users(row, median_sessions, median_sessions_2, median_sessions_3, median_sessions_4):
