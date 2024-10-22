@@ -107,9 +107,14 @@ def make_predictions(df):
         st.error(f"Error during scaling: {e}")
         return None
 
-    # Feature Selection
+   # Feature Selection
     try:
+        # Ensure temp_X_test is defined and valid
+        temp_X_test_filtered = temp_X_test  # Adjust this as necessary
         X_test_selected = selector.transform(temp_X_test_filtered)
+    except AttributeError as e:
+        st.error(f"Attribute error during feature selection: {e}")
+        return None
     except Exception as e:
         st.error(f"Error during feature selection: {e}")
         return None
