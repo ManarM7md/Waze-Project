@@ -99,8 +99,21 @@ def make_predictions(df):
         return None
 
     # Feature Selection
+    expected_columns = selector.get_feature_names_out()
+    print("Expected features by selector:", expected_columns)
+    print("Shape of temp_X_test:", temp_X_test.shape)
+
+    # Ensure temp_X_test only contains the columns that the selector expects
+    temp_X_test_filtered = temp_X_test[expected_columns]
+
+    # Check if the columns match
+    if temp_X_test_filtered.shape[1] != expected_columns.shape[0]:
+        st.error("Mismatch in feature count after filtering.")
+        return None
+
+    # Feature Selection
     try:
-        X_test_selected = selector.transform(temp_X_test)
+        X_test_selected = selector.transform(temp_X_test_filtered)
     except Exception as e:
         st.error(f"Error during feature selection: {e}")
         return None
