@@ -14,7 +14,7 @@ import pickle
 from sklearn.metrics import classification_report
 
 # Load the scaler and model
-with open('scaler.pkl', 'rb') as file:
+with open('https://github.com/ManarM7md/Waze-Project/blob/main/scaler.pkl', 'rb') as file:
     scaler = pickle.load(file)
 
 with open('SelectFromModel.pkl', 'rb') as file:
