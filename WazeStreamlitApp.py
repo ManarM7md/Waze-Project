@@ -18,10 +18,10 @@ from sklearn.metrics import classification_report
 
 # Function to load .pkl files from a GitHub URL
 def load_pickle_from_url(url):
+    """Load a pickle file from a specified URL."""
     try:
         response = requests.get(url)
         response.raise_for_status()  # Check if the request was successful
-        print(response.text)  # Debugging line to print fetched content
         file_content = io.BytesIO(response.content)
         return pickle.load(file_content)
     except requests.exceptions.RequestException as e:
@@ -31,12 +31,12 @@ def load_pickle_from_url(url):
         st.error(f"Error unpickling the file: {e}")
         return None
 
-# Load the scaler and model using the custom function
+# Load models and scaler
 scaler = load_pickle_from_url('https://github.com/ManarM7md/Waze-Project/raw/main/scaler.pkl')
 model, selector = load_pickle_from_url('https://github.com/ManarM7md/Waze-Project/raw/main/lasso_model_and_selector.pkl')
 logistic_regression_model = load_pickle_from_url('https://github.com/ManarM7md/Waze-Project/raw/main/logistic_regression_model.pkl')
 
-
+# User segmentation based on engagement levels
 def segment_users(row, median_sessions, median_sessions_2, median_sessions_3, median_sessions_4):
     """Segment users based on engagement levels."""
     if (row['sessions'] > median_sessions and
@@ -46,19 +46,22 @@ def segment_users(row, median_sessions, median_sessions_2, median_sessions_3, me
         return 'High Engagement'
     return 'Low Engagement'
 
+# User segmentation based on driving days
 def segment_driving_days(row, median_sessions, median_sessions_2):
     """Segment users based on day levels."""
     if row['activity_days'] <= median_sessions and row['driving_days'] <= median_sessions_2:
         return 'High day'
     return 'Low day'
 
+# Preprocess the input DataFrame
 def preprocess_dataframe(df):
-    """Preprocess the input DataFrame."""
+    """Drop unnecessary columns from the DataFrame."""
     columns_to_drop = ['ID', 'device']
     existing_columns_to_drop = [col for col in columns_to_drop if col in df.columns]
     df.drop(columns=existing_columns_to_drop, inplace=True)
     return df
 
+# Make predictions based on the provided DataFrame
 def make_predictions(df):
     """Make predictions based on the provided DataFrame."""
     if df is None or df.empty:
@@ -66,7 +69,7 @@ def make_predictions(df):
         return None
 
     X_test = df.drop('label', axis=1, errors='ignore')
-    
+
     # Segmenting engagement levels and day levels
     X_test['engagement_level'] = X_test.apply(segment_users, axis=1, args=(
         X_test['sessions'].median(),
@@ -86,18 +89,16 @@ def make_predictions(df):
     X_test['engagement_ratio'] = X_test['total_sessions'] / X_test['driving_days'].replace(0, np.nan)
     X_test['avg_navigations_fav'] = (X_test['total_navigations_fav1'] + X_test['total_navigations_fav2']) / 2
 
-    # Filling NaN values
+    # Filling NaN values with median
     for col in ['activity_ratio', 'avg_distance_per_drive', 'engagement_ratio', 'avg_navigations_fav']:
-        X_test[col] = X_test[col].fillna(X_test[col].median())
+        X_test[col].fillna(X_test[col].median(), inplace=True)
 
     # Mapping engagement and day levels to numerical values
     X_test['engagement_level'] = X_test['engagement_level'].map({'Low Engagement': 0, 'High Engagement': 1})
     X_test['day_level'] = X_test['day_level'].map({'Low day': 0, 'High day': 1})
 
-    # Prepare the DataFrame for scaling
-    temp_X_test = X_test.copy()
-
     # Scale necessary features
+    temp_X_test = X_test.copy()
     temp_X_test['n_days_after_onboarding'] = (X_test['n_days_after_onboarding'] / 365).astype(float)
     temp_X_test['duration_minutes_drives'] = (X_test['duration_minutes_drives'] / (60 * 24)).astype(float)
 
@@ -109,14 +110,10 @@ def make_predictions(df):
         st.error(f"Error during scaling: {e}")
         return None
 
-   # Feature Selection
+    # Feature Selection
     try:
-        temp_X_test_filtered = temp_X_test.copy()  # Ensure this is defined correctly
         selector = SelectFromModel(model, prefit=True)
-        X_test_selected = selector.transform(temp_X_test_filtered)
-    except AttributeError as e:
-        st.error(f"Attribute error during feature selection: {e}")
-        return None
+        X_test_selected = selector.transform(temp_X_test)
     except Exception as e:
         st.error(f"Error during feature selection: {e}")
         return None
@@ -139,6 +136,7 @@ uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
+    df = preprocess_dataframe(df)  # Ensure preprocessing is applied
 
     # Make predictions
     results = make_predictions(df)
