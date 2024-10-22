@@ -11,17 +11,26 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import pickle
+import requests
+import io
 from sklearn.metrics import classification_report
 
-# Load the scaler and model
-with open('https://github.com/ManarM7md/Waze-Project/blob/main/scaler.pkl', 'rb') as file:
-    scaler = pickle.load(file)
+# Function to load .pkl files from a GitHub URL
+def load_pickle_from_url(url):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Check if the request was successful
+        file_content = io.BytesIO(response.content)
+        return pickle.load(file_content)
+    except requests.exceptions.RequestException as e:
+        st.error(f"Failed to load the file from {url}: {e}")
+        return None
 
-with open('https://github.com/ManarM7md/Waze-Project/blob/main/SelectFromModel.pkl', 'rb') as file:
-    selector = pickle.load(file)
+# Load the scaler and model using the custom function
+scaler = load_pickle_from_url('https://github.com/ManarM7md/Waze-Project/raw/main/scaler.pkl')
+selector = load_pickle_from_url('https://github.com/ManarM7md/Waze-Project/raw/main/SelectFromModel.pkl')
+logistic_regression_model = load_pickle_from_url('https://github.com/ManarM7md/Waze-Project/raw/main/logistic_regression_model.pkl')
 
-with open('https://github.com/ManarM7md/Waze-Project/blob/main/logistic_regression_model.pkl', 'rb') as file:
-    logistic_regression_model = pickle.load(file)
 
 def segment_users(row, median_sessions, median_sessions_2, median_sessions_3, median_sessions_4):
     """ Segment users based on engagement levels"""
