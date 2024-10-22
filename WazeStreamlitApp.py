@@ -20,10 +20,14 @@ def load_pickle_from_url(url):
     try:
         response = requests.get(url)
         response.raise_for_status()  # Check if the request was successful
+        print(response.text)  # Debugging line to print fetched content
         file_content = io.BytesIO(response.content)
         return pickle.load(file_content)
     except requests.exceptions.RequestException as e:
         st.error(f"Failed to load the file from {url}: {e}")
+        return None
+    except pickle.UnpicklingError as e:
+        st.error(f"Error unpickling the file: {e}")
         return None
 
 # Load the scaler and model using the custom function
@@ -144,8 +148,6 @@ uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
-    st.write("Data Preview:")
-    st.dataframe(df.head())
 
     # Make predictions
     results = make_predictions(df)
