@@ -54,6 +54,24 @@ def preprocess_dataframe(df):
     return df
 
 def make_predictions(df):
+    
+    if df is not None:
+        X_test = df.drop('label', axis=1, errors='ignore')
+        y_test = df.get('label', None)
+    else:
+        columns = ['sessions', 'drives', 'total_sessions', 'n_days_after_onboarding',
+                   'total_navigations_fav1', 'total_navigations_fav2',
+                   'driven_km_drives', 'duration_minutes_drives',
+                   'activity_days', 'driving_days', 'device']
+
+        input_data = [sessions, drives, total_sessions, n_days_after_onboarding,
+                      total_navigations_fav1, total_navigations_fav2,
+                      driven_km_drives, duration_minutes_drives,
+                      activity_days, driving_days, device]
+
+        df = pd.DataFrame([input_data], columns=columns)
+        
+    X_test = df
     X_test = preprocess_dataframe(df)
 
     # Segmenting engagement levels and day levels
