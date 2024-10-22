@@ -54,26 +54,13 @@ def preprocess_dataframe(df):
     return df
 
 def make_predictions(df):
+    """Make predictions based on the provided DataFrame."""
+    if df is None or df.empty:
+        st.error("Input DataFrame is empty or not provided.")
+        return None
+
+    X_test = df.drop('label', axis=1, errors='ignore')
     
-    if df is not None:
-        X_test = df.drop('label', axis=1, errors='ignore')
-        y_test = df.get('label', None)
-    else:
-        columns = ['sessions', 'drives', 'total_sessions', 'n_days_after_onboarding',
-                   'total_navigations_fav1', 'total_navigations_fav2',
-                   'driven_km_drives', 'duration_minutes_drives',
-                   'activity_days', 'driving_days', 'device']
-
-        input_data = [sessions, drives, total_sessions, n_days_after_onboarding,
-                      total_navigations_fav1, total_navigations_fav2,
-                      driven_km_drives, duration_minutes_drives,
-                      activity_days, driving_days, device]
-
-        df = pd.DataFrame([input_data], columns=columns)
-        
-    X_test = df
-    X_test = preprocess_dataframe(df)
-
     # Segmenting engagement levels and day levels
     X_test['engagement_level'] = X_test.apply(segment_users, axis=1, args=(
         X_test['sessions'].median(),
@@ -104,7 +91,7 @@ def make_predictions(df):
     # Prepare the DataFrame for scaling
     temp_X_test = X_test.copy()
 
-    # Scale the necessary features
+    # Scale necessary features
     temp_X_test['n_days_after_onboarding'] = (X_test['n_days_after_onboarding'] / 365).astype(float)
     temp_X_test['duration_minutes_drives'] = (X_test['duration_minutes_drives'] / (60 * 24)).astype(float)
 
@@ -117,9 +104,12 @@ def make_predictions(df):
         return None
 
     # Feature Selection
-    expected_columns = selector.get_feature_names_out()
-    print("Expected features by selector:", expected_columns)
-    print("Shape of temp_X_test:", temp_X_test.shape)
+    try:
+        expected_columns = selector.get_feature_names_out()
+        print("Expected features by selector:", expected_columns)
+    except Exception as e:
+        st.error(f"Error fetching expected columns: {e}")
+        return None
 
     # Ensure temp_X_test only contains the columns that the selector expects
     temp_X_test_filtered = temp_X_test[expected_columns]
@@ -137,10 +127,13 @@ def make_predictions(df):
         return None
 
     # Make predictions
-    y_pred = logistic_regression_model.predict(X_test_selected)
-    y_pred_label = ['churned' if pred == 0 else 'retained' for pred in y_pred]
-
-    return pd.DataFrame({'Predicted': y_pred_label})
+    try:
+        y_pred = logistic_regression_model.predict(X_test_selected)
+        y_pred_label = ['churned' if pred == 0 else 'retained' for pred in y_pred]
+        return pd.DataFrame({'Predicted': y_pred_label})
+    except Exception as e:
+        st.error(f"Error during prediction: {e}")
+        return None
 
 # Streamlit app
 st.title("Waze App User Churn Prediction")
