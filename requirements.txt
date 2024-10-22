@@ -1,4 +1,7 @@
 streamlit
 pandas
 numpy
+pickle
+requests
+io
 scikit-learn
