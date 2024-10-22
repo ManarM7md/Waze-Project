@@ -32,8 +32,13 @@ def load_pickle_from_url(url):
 
 # Load the scaler and model using the custom function
 scaler = load_pickle_from_url('https://github.com/ManarM7md/Waze-Project/raw/main/scaler.pkl')
-selector = load_pickle_from_url('https://github.com/ManarM7md/Waze-Project/raw/main/lasso_model_and_selector.pkl')
+model, selector = load_pickle_from_url('https://github.com/ManarM7md/Waze-Project/raw/main/lasso_model_and_selector.pkl')
 logistic_regression_model = load_pickle_from_url('https://github.com/ManarM7md/Waze-Project/raw/main/logistic_regression_model.pkl')
+
+# Ensure the loaded selector is a SelectFromModel instance
+if not isinstance(selector, SelectFromModel):
+    st.error("Loaded selector is not of type SelectFromModel.")
+    return None
 
 def segment_users(row, median_sessions, median_sessions_2, median_sessions_3, median_sessions_4):
     """Segment users based on engagement levels."""
@@ -109,8 +114,7 @@ def make_predictions(df):
 
    # Feature Selection
     try:
-        # Ensure temp_X_test is defined and valid
-        temp_X_test_filtered = temp_X_test  # Adjust this as necessary
+        temp_X_test_filtered = temp_X_test.copy()  # Ensure this is defined correctly
         X_test_selected = selector.transform(temp_X_test_filtered)
     except AttributeError as e:
         st.error(f"Attribute error during feature selection: {e}")
