@@ -17,7 +17,7 @@ from sklearn.metrics import classification_report
 with open('https://github.com/ManarM7md/Waze-Project/blob/main/scaler.pkl', 'rb') as file:
     scaler = pickle.load(file)
 
-with open('https://github.com/ManarM7md/Waze-Project/blob/main/SelectFromModel.pkl, 'rb') as file:
+with open('https://github.com/ManarM7md/Waze-Project/blob/main/SelectFromModel.pkl', 'rb') as file:
     selector = pickle.load(file)
 
 with open('https://github.com/ManarM7md/Waze-Project/blob/main/logistic_regression_model.pkl', 'rb') as file:
