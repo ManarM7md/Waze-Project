@@ -31,23 +31,20 @@ scaler = load_pickle_from_url('https://github.com/ManarM7md/Waze-Project/raw/mai
 selector = load_pickle_from_url('https://github.com/ManarM7md/Waze-Project/raw/main/SelectFromModel.pkl')
 logistic_regression_model = load_pickle_from_url('https://github.com/ManarM7md/Waze-Project/raw/main/logistic_regression_model.pkl')
 
-
 def segment_users(row, median_sessions, median_sessions_2, median_sessions_3, median_sessions_4):
-    """ Segment users based on engagement levels"""
+    """Segment users based on engagement levels."""
     if (row['sessions'] > median_sessions and
         row['total_navigations_fav1'] >= median_sessions_2 and
         row['n_days_after_onboarding'] >= median_sessions_3 and
         row['drives'] <= median_sessions_4):
         return 'High Engagement'
-    else:
-        return 'Low Engagement'
+    return 'Low Engagement'
 
 def segment_driving_days(row, median_sessions, median_sessions_2):
-    """ Segment users based on day levels"""
+    """Segment users based on day levels."""
     if row['activity_days'] <= median_sessions and row['driving_days'] <= median_sessions_2:
         return 'High day'
-    else:
-        return 'Low day'
+    return 'Low day'
 
 def preprocess_dataframe(df):
     """Preprocess the input DataFrame."""
@@ -95,10 +92,18 @@ def make_predictions(df):
 
     columns = ['total_navigations_fav1', 'total_navigations_fav2', 'total_sessions', 'driven_km_drives']
 
-    temp_X_test[columns] = scaler.transform(temp_X_test[columns])
+    try:
+        temp_X_test[columns] = scaler.transform(temp_X_test[columns])
+    except ValueError as e:
+        st.error(f"Error during scaling: {e}")
+        return None
 
     # Feature Selection
-    X_test_selected = selector.transform(temp_X_test)
+    try:
+        X_test_selected = selector.transform(temp_X_test)
+    except Exception as e:
+        st.error(f"Error during feature selection: {e}")
+        return None
 
     # Make predictions
     y_pred = logistic_regression_model.predict(X_test_selected)
@@ -120,5 +125,6 @@ if uploaded_file is not None:
 
     # Make predictions
     results = make_predictions(df)
-    st.write("Prediction Results:")
-    st.dataframe(results)
+    if results is not None:
+        st.write("Prediction Results:")
+        st.dataframe(results)
