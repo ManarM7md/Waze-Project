@@ -20,7 +20,7 @@ with open('https://github.com/ManarM7md/Waze-Project/blob/main/scaler.pkl', 'rb'
 with open('https://github.com/ManarM7md/Waze-Project/blob/main/SelectFromModel.pkl, 'rb') as file:
     selector = pickle.load(file)
 
-with open('logistic_regression_model.pkl', 'rb') as file:
+with open('https://github.com/ManarM7md/Waze-Project/blob/main/logistic_regression_model.pkl', 'rb') as file:
     logistic_regression_model = pickle.load(file)
 
 def segment_users(row, median_sessions, median_sessions_2, median_sessions_3, median_sessions_4):
