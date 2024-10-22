@@ -36,7 +36,7 @@ model, selector = load_pickle_from_url('https://github.com/ManarM7md/Waze-Projec
 logistic_regression_model = load_pickle_from_url('https://github.com/ManarM7md/Waze-Project/raw/main/logistic_regression_model.pkl')
 
 # Ensure the loaded selector is a SelectFromModel instance
-if not isinstance(selector, SelectFromModel):
+if not isinstance(selector, lasso_model_and_selector):
     st.error("Loaded selector is not of type SelectFromModel.")
     return None
 
